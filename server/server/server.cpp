@@ -34,19 +34,70 @@ int main() {
 
 	bind(listenerSocket, (sockaddr*)&hint, sizeof(hint));
 
-
-
 	// Tell winsock the socket is for listening
+
+	listen(listenerSocket, SOMAXCONN);
 
 	// Wait for connetction
 
+	sockaddr_in client;
+	int clientSize = sizeof(client);
+
+	SOCKET clientSocket = accept(listenerSocket, (sockaddr*)&client, &clientSize);
+	if (clientSocket == INVALID_SOCKET) {
+		cerr << "Accepting client failed!" << endl;
+		return 0;
+	}
+
+	char host[NI_MAXHOST]; // client remote name
+	char service[NI_MAXSERV]; //Service (i.e. port) the client is connected on
+
+	ZeroMemory(host, NI_MAXHOST); // same as memset(host, 0, NI_MAXHOST)
+	ZeroMemory(service, NI_MAXSERV);
+	
+	if (getnameinfo((sockaddr*)&client, sizeof(client), host, NI_MAXHOST, service, NI_MAXSERV, 0) == 0) {
+		cout << host << " connected on port " << service << endl;
+	}
+	else {
+		inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
+		cout << host << " connected on port " << ntohs(client.sin_port) << endl;
+	}
+
 	// Close listening socket
+
+	closesocket(listenerSocket);
 
 	// While loop: accept and echo message back to client
 
+	char buf[4096];
+
+	while (true) {
+
+		ZeroMemory(buf, 4096);
+
+		// Wait for client to send data
+		int bytesReceived = recv(clientSocket, buf, 4096, 0);
+		if (bytesReceived == SOCKET_ERROR) {
+			cerr << "Error in recv()" << endl;
+			break;
+		}
+
+		if (bytesReceived == 0) {
+			cout << "Client disconnected" << endl;
+			break;
+		}
+
+		// Echo message back to the client
+		send(clientSocket, buf, bytesReceived + 1, 0);
+	}
+
 	// Close socket
 
-	// Shutdown winsock
+	closesocket(clientSocket);
+
+	// Cleanup winsock
+
+	WSACleanup();
 
 	return 0;
 }
