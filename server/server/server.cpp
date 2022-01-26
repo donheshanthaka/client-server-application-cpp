@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <WS2tcpip.h>
 
 #pragma comment (lib, "WS2_32.lib") //Winsock Library
@@ -88,6 +89,7 @@ int main() {
 		}
 
 		// Echo message back to the client
+		cout << endl << "CLIENT: " << string(buf, 0, bytesReceived) << endl;
 		send(clientSocket, buf, bytesReceived + 1, 0);
 	}
 
