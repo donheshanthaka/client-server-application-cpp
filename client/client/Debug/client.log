@@ -1,3 +1,2 @@
 ﻿  client.cpp
-D:\Projects\C++\new client server\client\client\client.cpp(4,36): warning C4081: expected 'newline'; found ';'
   client.vcxproj -> D:\Projects\C++\new client server\client\Debug\client.exe

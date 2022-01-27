@@ -4,8 +4,6 @@
 
 #pragma comment (lib, "WS2_32.lib") //Winsock Library
 
-using namespace std;
-
 int main() {
 
 	// Initialize winsock
@@ -14,20 +12,18 @@ int main() {
 
 	int wSock = WSAStartup(ver, &wsData);
 	if (wSock != 0) {
-		cerr << "Winsock initialization failed!" << endl;
+		std::cerr << "Winsock initialization failed!" << std::endl;
 		return 0;
 	}
 
 	// Create socket
-
 	SOCKET listenerSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (listenerSocket == INVALID_SOCKET) {
-		cerr << "Socket creation failed!" << endl;
+		std::cerr << "Socket creation failed!" << std::endl;
 		return 0;
 	}
 
 	// Bind the ip address and port to a socket
-
 	sockaddr_in hint;
 	hint.sin_family = AF_INET;
 	hint.sin_port = htons(54000);
@@ -36,17 +32,15 @@ int main() {
 	bind(listenerSocket, (sockaddr*)&hint, sizeof(hint));
 
 	// Tell winsock the socket is for listening
-
 	listen(listenerSocket, SOMAXCONN);
 
 	// Wait for connetction
-
 	sockaddr_in client;
 	int clientSize = sizeof(client);
 
 	SOCKET clientSocket = accept(listenerSocket, (sockaddr*)&client, &clientSize);
 	if (clientSocket == INVALID_SOCKET) {
-		cerr << "Accepting client failed!" << endl;
+		std::cerr << "Accepting client failed!" << std::endl;
 		return 0;
 	}
 
@@ -57,15 +51,14 @@ int main() {
 	ZeroMemory(service, NI_MAXSERV);
 	
 	if (getnameinfo((sockaddr*)&client, sizeof(client), host, NI_MAXHOST, service, NI_MAXSERV, 0) == 0) {
-		cout << host << " connected on port " << service << endl;
+		std::cout << host << " connected on port " << service << std::endl;
 	}
 	else {
 		inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
-		cout << host << " connected on port " << ntohs(client.sin_port) << endl;
+		std::cout << host << " connected on port " << ntohs(client.sin_port) << std::endl;
 	}
 
 	// Close listening socket
-
 	closesocket(listenerSocket);
 
 	// While loop: accept and echo message back to client
@@ -79,26 +72,26 @@ int main() {
 		// Wait for client to send data
 		int bytesReceived = recv(clientSocket, buf, 4096, 0);
 		if (bytesReceived == SOCKET_ERROR) {
-			cerr << "Error in recv()" << endl;
+			std::cerr << "Error in recv()" << std::endl;
 			break;
 		}
 
 		if (bytesReceived == 0) {
-			cout << "Client disconnected" << endl;
+			std::cout << "Client disconnected" << std::endl;
 			break;
 		}
 
+		// Display client message on console
+		std::cout << std::endl << "CLIENT: " << std::string(buf, 0, bytesReceived) << std::endl;
+
 		// Echo message back to the client
-		cout << endl << "CLIENT: " << string(buf, 0, bytesReceived) << endl;
 		send(clientSocket, buf, bytesReceived + 1, 0);
 	}
 
 	// Close socket
-
 	closesocket(clientSocket);
 
 	// Cleanup winsock
-
 	WSACleanup();
 
 	return 0;
